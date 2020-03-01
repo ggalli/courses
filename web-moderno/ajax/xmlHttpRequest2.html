@@ -22,6 +22,35 @@
     <div class="progresso"></div>
 
     <script>
-        // ...
+        function ajaxUpload(config){
+            const xhr = new XMLHttpRequest();
+
+            if (xhr.upload) {
+                xhr.upload.onprogress = e => {
+                    const current = e.loaded;
+                    const total = e.total;
+                    const percentage = Math.floor(current / total * 100);
+                    config.progress({current, total, percentage})
+                }
+            }
+
+            xhr.open("POST", config.url, true);
+            xhr.send(config.formData)
+        }
+
+        document.querySelector("input[type=file]").onchange = e => {
+            const formData = new FormData();
+            const inputFile = e.target;
+            formData.append(inputFile.name, inputFile.files[0]);
+
+            ajaxUpload({
+                url: "/upload",
+                formData,
+                progress(data){
+                    const progress = document.querySelector(".progresso");
+                    progress.innerHTML = `${data.current}/${data.total} (${data.percentage}%)`
+                }
+            })
+        }
     </script>
 </body>
